@@ -83,12 +83,13 @@ public class CellControl : MonoBehaviour {
 	
 	}
 	
+	
+	// Get Compounds on the ground
     void OnTriggerEnter(Collider other) {
 		Destroy(other.gameObject);
 		if(other.name == "Res_Glucose")
 		{
-			transform.GetComponent<CellParam>().GainATP (16);
+			transform.GetComponent<CellParam>()._Compound[(int)CompoundName.Sugar].CurValue++;
 		}
-		
     }
 }

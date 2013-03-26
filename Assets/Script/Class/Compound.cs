@@ -5,8 +5,8 @@ public class Compound {
 	
 	private string _name;
 	private int _curValue = 0;
-	private int _maxValue = 10;
-	private int _optValue;
+	private int _maxValue = 100;
+	private bool _limValue = true;
 	
 	public string Name
 	{
@@ -27,10 +27,10 @@ public class Compound {
 		set {_maxValue = value; }
 	}
 	
-	public int OptValue
+	public bool LimValue
 	{
-		get {return _optValue; }
-		set {_optValue = value; }
+		get {return _limValue; }
+		set {_limValue = value; }
 	}
 	
 }
@@ -44,5 +44,6 @@ public enum CompoundName {
 	Fat,
 	ATP,
 	Water,
-	CO2
+	CO2,
+	Ammonia,
 }

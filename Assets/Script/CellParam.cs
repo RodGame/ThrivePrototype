@@ -45,21 +45,21 @@ public class CellParam : MonoBehaviour {
 	void Awake()
 	{
 		// Initialize Compound values
-		 _atpCurValue = 1000;		
+		 _atpCurValue = 500;		
 		 _atpMaxValue = 1000;
-		 _oxygenCurValue = 350;		
+		 _oxygenCurValue = 300;		
 		 _oxygenMaxValue = 500;
 		 _sugarCurValue = 15;
 		 _sugarMaxValue = 50;
-		 _aminoAcidsCurValue = 0;
+		 _aminoAcidsCurValue = 50;
 		 _aminoAcidsMaxValue = 100;
-		 _proteinCurValue = 500;
+		 _proteinCurValue = 200;
 		 _proteinMaxValue = 500;
-		 _fatCurValue = 500;
+		 _fatCurValue = 200;
 		 _fatMaxValue = 500;
-		 _waterCurValue = 250;
+		 _waterCurValue = 200;
 		 _waterMaxValue = 500;
-		 _co2CurValue = 0;	
+		 _co2CurValue = 50;	
 		 _co2MaxValue = 100;
 		
 		// Initialize classes and setup them
@@ -91,6 +91,7 @@ public class CellParam : MonoBehaviour {
 			{
 				_Compound[i].CurValue = _oxygenCurValue;	
 				_Compound[i].MaxValue = _oxygenMaxValue;
+				_Compound[i].LimValue = false;
 			}
 			else if(_Compound[i].Name == "Sugar")
 			{
@@ -116,12 +117,20 @@ public class CellParam : MonoBehaviour {
 			{
 				_Compound[i].CurValue = _waterCurValue;	
 				_Compound[i].MaxValue = _waterMaxValue;
+				_Compound[i].LimValue = false;
 			}
 			else if(_Compound[i].Name == "CO2")
 			{
 				_Compound[i].CurValue = _co2CurValue;	
 				_Compound[i].MaxValue = _co2MaxValue;
-			}			
+				_Compound[i].LimValue = false;
+			}		
+			else if(_Compound[i].Name == "Ammonia")
+			{
+				_Compound[i].CurValue = _co2CurValue;	//TO update
+				_Compound[i].MaxValue = _co2MaxValue;	//TO update
+				_Compound[i].LimValue = false;
+			}
 		}
 	}
 	
@@ -136,17 +145,67 @@ public class CellParam : MonoBehaviour {
 			{
 				_Process[i].Available  = true;
 				_Process[i].Activated  = true;
-				_Process[i].CompInput  = "1xSugar";
-				_Process[i].CompOutput = "1xCO2+18xATP";
+				_Process[i].CompInput  = "1*Sugar";
+				_Process[i].CompOutput = "18*ATP+3*CO2";
 			}
-			
-			if(_Process[i].Name == "AerobicResp")
+			else if(_Process[i].Name == "AerobicResp")
 			{
 				_Process[i].Available  = true;
 				_Process[i].Activated  = true;
-				_Process[i].CompInput  = "6xOxygen+Sugar";
-				_Process[i].CompOutput = "38xATP+6xWater+6xCO2";
+				_Process[i].CompInput  = "6*Oxygen+1*Sugar";
+				_Process[i].CompOutput = "38*ATP+6*Water+6*CO2";
 			}
+			
+			else if(_Process[i].Name == "FattyAcidResp")
+			{
+				_Process[i].Available  = true;
+				_Process[i].Activated  = false;
+				_Process[i].CompInput  = "6*Oxygen+1*Fat";
+				_Process[i].CompOutput = "50*ATP+6*Water+6*CO2";
+			}
+			
+			else if(_Process[i].Name == "AminoAcidResp")
+			{
+				_Process[i].Available  = true;
+				_Process[i].Activated  = false;
+				_Process[i].CompInput  = "6*Oxygen+1*AminoAcids";
+				_Process[i].CompOutput = "60*ATP+6*Water+6*CO2+6*Ammonia";
+			}
+			else if(_Process[i].Name == "Photosynthesis")
+			{
+				_Process[i].Available  = false;
+				_Process[i].Activated  = false;
+				_Process[i].CompInput  = "4*CO2+6*Water+6*Light(Not implemented)";
+				_Process[i].CompOutput = "5*Sugar+6*Oxygen";
+			}
+			else if(_Process[i].Name == "ProteinCatab")
+			{
+				_Process[i].Available  = true;
+				_Process[i].Activated  = false;
+				_Process[i].CompInput  = "6*Protein";
+				_Process[i].CompOutput = "4*AminoAcids";
+			}
+			else if(_Process[i].Name == "AminoAcidBiosynth")
+			{
+				_Process[i].Available  = true;
+				_Process[i].Activated  = false;
+				_Process[i].CompInput  = "5*Sugar+2*Ammonia";
+				_Process[i].CompOutput = "5*CO2+2*ATP+2*AminoAcids";
+			}
+			else if(_Process[i].Name == "FattyAcidSynth")
+			{
+				_Process[i].Available  = true;
+				_Process[i].Activated  = false;
+				_Process[i].CompInput  = "5*AminoAcids";
+				_Process[i].CompOutput = "6*Ammonia+2*Fat";
+			}
+			else if(_Process[i].Name == "ProteinSynth")
+			{
+				_Process[i].Available  = true;
+				_Process[i].Activated  = false;
+				_Process[i].CompInput  = "6*AminoAcids";
+				_Process[i].CompOutput = "4*Protein";
+			}	
 		}
 	}	
 	

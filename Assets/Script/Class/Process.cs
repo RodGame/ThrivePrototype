@@ -48,8 +48,8 @@ public enum ProcessName {
 	FattyAcidResp,
 	AminoAcidResp,
 	Photosynthesis,
-	ProteinCatab,
 	AminoAcidBiosynth,
 	FattyAcidSynth,
+	ProteinCatab,
 	ProteinSynth
 }

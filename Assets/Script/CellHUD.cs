@@ -131,7 +131,6 @@ public class CellHUD : MonoBehaviour {
 			__toggleBool = GUI.Toggle(new Rect(_leftStatsHUD + LABEL_SIZE               + 5 + TOGGLE_OFFSET, 40+(i*STATS_LINE_HEIGHT), STATS_LINE_HEIGHT, STATS_LINE_HEIGHT),transform.GetComponent<CellParam>()._Process[i].Activated,"");
 			if((__toggleBool != transform.GetComponent<CellParam>()._Process[i].Activated) && (transform.GetComponent<CellParam>()._Process[i].Available == true))
 			{
-				Debug.Log (transform.GetComponent<CellParam>()._Process[i].Activated);
 				transform.GetComponent<CellParam>()._Process[i].Activated = !transform.GetComponent<CellParam>()._Process[i].Activated;	
 			}
 			
