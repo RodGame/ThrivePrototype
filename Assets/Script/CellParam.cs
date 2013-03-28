@@ -2,8 +2,7 @@
 /// RodGame
 /// 25Mar13
 /// 
-/// This script contains initialize the Process and Compounds class for the cell.
-/// It also give initial values to each of them
+/// This script contain the Initialization and Setup of the Organelle, Process and Compounds
 /// </summary>
 
 using UnityEngine;
@@ -12,130 +11,130 @@ using System;						//added to access the enum class
 
 //-->Priority
 //TODO: Make compounds slowly move towards their OptValue
-//TODO: Use process to do conversion to ATP
 //TODO: Inport Coumpound and Process from XML
 
 //-->After
 //TODO: Add Organel class
 public class CellParam : MonoBehaviour {
 	
-	public int moveCostATP;				//ATP cost whenever a key is pressed and force is added to the cell
 	
 	public Compound[] _Compound;		//Compound class
 	public Process[] _Process;			//Process class
+	public Organelle[] _Organelle;		//Organelle class
+	
+	private int _moveCostATP;				//ATP cost whenever a key is pressed and force is added to the cell
 	
 	// Initialize Compounds Max and Current Values
-	private int _atpMaxValue;
-	private int _atpCurValue;	
-	private int _oxygenMaxValue;
-	private int _oxygenCurValue;
-	private int _sugarMaxValue;
-	private int _sugarCurValue;
-	private int _aminoAcidsMaxValue;
-	private int _aminoAcidsCurValue;
-	private int _proteinMaxValue;
-	private int _proteinCurValue;
-	private int _fatMaxValue;
-	private int _fatCurValue;
-	private int _waterMaxValue;
-	private int _waterCurValue;
-	private int _co2MaxValue;
-	private int _co2CurValue;	
+	private int _atpMaxValueINI;
+	private int _atpCurValueINI;	
+	private int _oxygenMaxValueINI;
+	private int _oxygenCurValueINI;
+	private int _sugarMaxValueINI;
+	private int _sugarCurValueINI;
+	private int _aminoAcidsMaxValueINI;
+	private int _aminoAcidsCurValueINI;
+	private int _proteinMaxValueINI;
+	private int _proteinCurValueINI;
+	private int _fatMaxValueINI;
+	private int _fatCurValueINI;
+	private int _waterMaxValueINI;
+	private int _waterCurValueINI;
+	private int _co2MaxValueINI;
+	private int _co2CurValueINI;	
 	
 	void Awake()
 	{
+		
+		_moveCostATP = 1;
+		
 		// Initialize Compound values
-		 _atpCurValue = 500;		
-		 _atpMaxValue = 1000;
-		 _oxygenCurValue = 300;		
-		 _oxygenMaxValue = 500;
-		 _sugarCurValue = 15;
-		 _sugarMaxValue = 50;
-		 _aminoAcidsCurValue = 50;
-		 _aminoAcidsMaxValue = 100;
-		 _proteinCurValue = 200;
-		 _proteinMaxValue = 500;
-		 _fatCurValue = 200;
-		 _fatMaxValue = 500;
-		 _waterCurValue = 200;
-		 _waterMaxValue = 500;
-		 _co2CurValue = 50;	
-		 _co2MaxValue = 100;
+		_atpCurValueINI = 500;		
+		_atpMaxValueINI = 1000;
+		_oxygenCurValueINI = 300;		
+		_oxygenMaxValueINI = 500;
+		_sugarCurValueINI = 15;
+		_sugarMaxValueINI = 50;
+		_aminoAcidsCurValueINI = 50;
+		_aminoAcidsMaxValueINI = 100;
+		_proteinCurValueINI = 200;
+		_proteinMaxValueINI = 500;
+		_fatCurValueINI = 200;
+		_fatMaxValueINI = 500;
+		_waterCurValueINI = 200;
+		_waterMaxValueINI = 500;
+		_co2CurValueINI = 50;	
+		_co2MaxValueINI = 100;
 		
-		// Initialize classes and setup them
-		_Compound = new Compound[Enum.GetValues(typeof(CompoundName)).Length];	
-		_Process  = new Process[Enum.GetValues(typeof(ProcessName)).Length];
-		SetupCompounds();
-		SetupProcess();
-
-		
-
-		
+		// Initialize and setup of classes
+		_Compound   = new Compound [Enum.GetValues(typeof(CompoundName )).Length];	
+		_Process    = new Process  [Enum.GetValues(typeof(ProcessName  )).Length];
+		_Organelle  = new Organelle[Enum.GetValues(typeof(OrganelleName)).Length];
+		_SetupOrganelle();
+		_SetupProcess();
+		_SetupCompounds();
 	}
 	
-	//Initialize the process array and give values to Compounds parameters
-	public void SetupCompounds()
+	
+	// Initliaze the Organelle with Initial Values
+	public void IniOrganelle()
 	{
-		for(int i = 0; i < _Compound.Length; i++)
+		for(int i = 0; i < _Organelle.Length; i++)
 		{
-			_Compound[i] = new Compound();
-			_Compound[i].Name = ((CompoundName)i).ToString();
+			_Organelle[i] = new Organelle();
+			_Organelle[i].Name = ((OrganelleName)i).ToString();
+			if(_Organelle[i].Name == "Mitochondria")
+			{ 
+				_Organelle[i].EnabledProcess  = "AerobicResp";
+				_Organelle[i].CurValue  = 1;
+			}
 			
-			// Assign Max and Current values to the coumpound array
-			if(_Compound[i].Name == "ATP")
-			{
-				_Compound[i].CurValue = _atpCurValue;	
-				_Compound[i].MaxValue = _atpMaxValue;
+			else if(_Organelle[i].Name == "Chloroplast")
+			{ 
+				_Organelle[i].EnabledProcess  = "Photosynthesis";
+				_Organelle[i].CurValue  = 0;
 			}
-			else if(_Compound[i].Name == "Oxygen")
-			{
-				_Compound[i].CurValue = _oxygenCurValue;	
-				_Compound[i].MaxValue = _oxygenMaxValue;
-				_Compound[i].LimValue = false;
+			
+			else if(_Organelle[i].Name == "Ribosome")
+			{ 
+				_Organelle[i].EnabledProcess  = "";
+				_Organelle[i].CurValue  = 0;
 			}
-			else if(_Compound[i].Name == "Sugar")
-			{
-				_Compound[i].CurValue = _sugarCurValue;	
-				_Compound[i].MaxValue = _sugarMaxValue;
+			
+			else if(_Organelle[i].Name == "Ribosome")
+			{ 
+				_Organelle[i].EnabledProcess  = "";
+				_Organelle[i].CurValue  = 0;
 			}
-			else if(_Compound[i].Name == "AminoAcids")
-			{
-				_Compound[i].CurValue = _aminoAcidsCurValue;	
-				_Compound[i].MaxValue = _aminoAcidsMaxValue;
+			
+			else if(_Organelle[i].Name == "Vacuole")
+			{ 
+				_Organelle[i].EnabledProcess  = "";
+				_Organelle[i].CurValue  = 0;
 			}
-			else if(_Compound[i].Name == "Protein")
-			{
-				_Compound[i].CurValue = _proteinCurValue;	
-				_Compound[i].MaxValue = _proteinMaxValue;
+			
+			else if(_Organelle[i].Name == "Flagellum")
+			{ 
+				_Organelle[i].EnabledProcess  = "";
+				_Organelle[i].CurValue  = 0;
 			}
-			else if(_Compound[i].Name == "Fat")
-			{
-				_Compound[i].CurValue = _fatCurValue;	
-				_Compound[i].MaxValue = _fatMaxValue;
+			
+			else if(_Organelle[i].Name == "Cilia")
+			{ 
+				_Organelle[i].EnabledProcess  = "";
+				_Organelle[i].CurValue  = 0;
 			}
-			else if(_Compound[i].Name == "Water")
-			{
-				_Compound[i].CurValue = _waterCurValue;	
-				_Compound[i].MaxValue = _waterMaxValue;
-				_Compound[i].LimValue = false;
+			
+			else if(_Organelle[i].Name == "Wall")
+			{ 
+				_Organelle[i].EnabledProcess  = "";
+				_Organelle[i].CurValue  = 0;
 			}
-			else if(_Compound[i].Name == "CO2")
-			{
-				_Compound[i].CurValue = _co2CurValue;	
-				_Compound[i].MaxValue = _co2MaxValue;
-				_Compound[i].LimValue = false;
-			}		
-			else if(_Compound[i].Name == "Ammonia")
-			{
-				_Compound[i].CurValue = _co2CurValue;	//TO update
-				_Compound[i].MaxValue = _co2MaxValue;	//TO update
-				_Compound[i].LimValue = false;
-			}
-		}
+			
+		}	
 	}
 	
-	//Initialize the process array and give values to process parameters
-	public void SetupProcess()
+	// Initliaze the Process with Initial Values
+	public void IniProcess()
 	{
 		for(int i = 0; i < _Process.Length; i++)
 		{
@@ -150,8 +149,8 @@ public class CellParam : MonoBehaviour {
 			}
 			else if(_Process[i].Name == "AerobicResp")
 			{
-				_Process[i].Available  = true;
-				_Process[i].Activated  = true;
+				_Process[i].Available  = false;
+				_Process[i].Activated  = false;
 				_Process[i].CompInput  = "6*Oxygen+1*Sugar";
 				_Process[i].CompOutput = "38*ATP+6*Water+6*CO2";
 			}
@@ -207,28 +206,115 @@ public class CellParam : MonoBehaviour {
 				_Process[i].CompOutput = "4*Protein";
 			}	
 		}
+	}
+	
+	// Initliaze the Compounds with Initial Values
+	public void IniCompounds()
+	{
+	for(int i = 0; i < _Compound.Length; i++)
+		{
+			_Compound[i] = new Compound();
+			_Compound[i].Name = ((CompoundName)i).ToString();
+			
+			// Assign Max and Current values to the coumpound array
+			if(_Compound[i].Name == "ATP")
+			{
+				_Compound[i].CurValue = _atpCurValueINI;	
+				_Compound[i].MaxValue = _atpMaxValueINI;
+			}
+			else if(_Compound[i].Name == "Oxygen")
+			{
+				_Compound[i].CurValue = _oxygenCurValueINI;	
+				_Compound[i].MaxValue = _oxygenMaxValueINI;
+				_Compound[i].LimValue = false;
+				_Compound[i].MinIntake = 0.5f;
+				_Compound[i].MaxIntake = 1.5f;
+			}
+			else if(_Compound[i].Name == "Sugar")
+			{
+				_Compound[i].CurValue = _sugarCurValueINI;	
+				_Compound[i].MaxValue = _sugarMaxValueINI;
+			}
+			else if(_Compound[i].Name == "AminoAcids")
+			{
+				_Compound[i].CurValue = _aminoAcidsCurValueINI;	
+				_Compound[i].MaxValue = _aminoAcidsMaxValueINI;
+			}
+			else if(_Compound[i].Name == "Protein")
+			{
+				_Compound[i].CurValue = _proteinCurValueINI;	
+				_Compound[i].MaxValue = _proteinMaxValueINI;
+			}
+			else if(_Compound[i].Name == "Fat")
+			{
+				_Compound[i].CurValue = _fatCurValueINI;	
+				_Compound[i].MaxValue = _fatMaxValueINI;
+			}
+			else if(_Compound[i].Name == "Water")
+			{
+				_Compound[i].CurValue = _waterCurValueINI;	
+				_Compound[i].MaxValue = _waterMaxValueINI;
+				_Compound[i].LimValue = false;
+				_Compound[i].MinIntake = 0.0f;
+				_Compound[i].MaxIntake = 1.0f;
+			}
+			else if(_Compound[i].Name == "CO2")
+			{
+				_Compound[i].CurValue = _co2CurValueINI;	
+				_Compound[i].MaxValue = _co2MaxValueINI;
+				_Compound[i].LimValue = false;
+				_Compound[i].MinIntake = -1.0f;
+				_Compound[i].MaxIntake = -2.0f;
+			}		
+			else if(_Compound[i].Name == "Ammonia")
+			{
+				_Compound[i].CurValue = _co2CurValueINI;	//TO update
+				_Compound[i].MaxValue = _co2MaxValueINI;	//TO update
+				_Compound[i].LimValue = false;
+			}
+		}	
+	}
+	
+
+	// Setup the Organelle system
+	private void _SetupOrganelle()
+	{
+		IniOrganelle();
 	}	
 	
-	// Use this for initialization
-	void Start () {
-		//_Compound[(int)CompoundName.ATP].MaxValue = 1000;
-		//_Compound[(int)CompoundName.ATP].CurValue = _Compound[(int)CompoundName.ATP].MaxValue;
-		moveCostATP = 1;
+	// Setup the Organelle system
+	private void _SetupProcess()
+	{
+		IniProcess ();
+		UpdateProcess();
+	}	
+	
+	// Setup the Organelle system
+	private void _SetupCompounds()
+	{
+		IniCompounds();
+	}
+	
+	
+	// Update the process list according to the organelle list
+	public void UpdateProcess()
+	{
+		for(int i = 0; i < _Organelle.Length; i++)
+		{
+			if(_Organelle[i].EnabledProcess != "" && _Organelle[i].CurValue > 0)
+			{
+				//ProcessName processIndex = (ProcessName) Enum.Parse(typeof(ProcessName), __CurProcess.Name);  
+				Debug.Log (_Organelle[i].EnabledProcess);
+				ProcessName __processToEnableIndex = (ProcessName) Enum.Parse(typeof(ProcessName), _Organelle[i].EnabledProcess);  
+				_Process[(int)__processToEnableIndex].Available = true;
+			}
+		}
 	}
 	
 	// Reduce ATP ressource whenever cell has moved
 	public void cellMoved()
 	{
-		_Compound[(int)CompoundName.ATP].CurValue -= moveCostATP;
+		_Compound[(int)CompoundName.ATP].CurValue -= _moveCostATP;
 	}
-	
-	// Add inputed amount of ATP to the cell
-	public void GainATP(int _ATPGained)
-	{
-		_Compound[(int)CompoundName.ATP].CurValue += _ATPGained;
-		if(_Compound[(int)CompoundName.ATP].CurValue > _Compound[(int)CompoundName.ATP].MaxValue)
-		{
-			_Compound[(int)CompoundName.ATP].CurValue = _Compound[(int)CompoundName.ATP].MaxValue;
-		}
-	}
+
 }

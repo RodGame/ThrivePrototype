@@ -6,9 +6,10 @@ using System.Collections.Generic; // For List class;
 public class ProcessFunctions : MonoBehaviour {
 	
 
-    private float _elapsedTime;		// Elapsed time since last tick
-	private float _timeProcessTick;	// Time of Process Ticks
-	
+    private float _elapsedTime;			// Elapsed time since last tick
+	private float _timeProcessTick;		// Time of Process Ticks
+	//private float _waterOxygenLevel;	// Level of oxygen in water;
+	//private float _waterCO2Level;		// Level of CO2 in water
 	
 	private Process[] _Process; 
 	private Compound[] _Compound;
@@ -22,8 +23,16 @@ public class ProcessFunctions : MonoBehaviour {
 	List<_CoumpoundsIO> _curInputs  = new List<_CoumpoundsIO>();
 	List<_CoumpoundsIO> _curOutputs = new List<_CoumpoundsIO>();
 	
+	
+	private GameObject _MicrobeStageManager;
+	
 	// Use this for initialization
 	void Start () {
+		
+		_MicrobeStageManager = GameObject.FindGameObjectWithTag ("StageManager") as GameObject;
+		//_waterOxygenLevel = _MicrobeStageManager.GetComponent<Environment>().WaterOxygenLevel; 
+		//_waterCO2Level = _MicrobeStageManager.GetComponent<Environment>().WaterCO2Level;
+				
 		_Process = transform.GetComponent<CellParam>()._Process;
 		_Compound = transform.GetComponent<CellParam>()._Compound;
 		
@@ -37,19 +46,42 @@ public class ProcessFunctions : MonoBehaviour {
 	// Update is called once per frame
 	void Update () 
 	{
-		
 		// Update every _timeProcessTick time
 		_elapsedTime += Time.deltaTime;			// Add time since last frame to _elapsedTime
 		if(_elapsedTime >= _timeProcessTick)	// If _elapsed Time is bigger than a tick
 		{
 			_elapsedTime -= _timeProcessTick;	// Remove a tick time from _elapsed time to account for time overshoot
+			_tickUpdate();						// Do all the function needed on update
 			
-			// Loop trough process list to evaluate Input/Output equations
-			for(int i = 0; i < _Process.Length; i++)
-			{
-				ProcessFunction(_Process[i]);
-			}
 		}
+	}
+	
+	private void _tickUpdate()
+	{
+		// Loop trough process list to evaluate Input/Output equations
+		for(int i = 0; i < _Process.Length; i++)
+		{
+			ProcessFunction(_Process[i]);
+		}
+		
+		// Loop trough Compounds list to find the ones to exchange compounds with environment
+		for(int i = 0; i < _Compound.Length; i++)
+		{
+			_ExchangeCompound(_Compound[i]);
+		}
+	}
+	
+	//TODO: Prevent exchange when the compound hit his desired value
+	// Exhange Compounds with environment at a rate between the MinIntake and the MaxIntake function of the Compound level in the water
+	private void _ExchangeCompound(Compound __CurCompound)
+	{
+		double __randomValue;
+			if(__CurCompound.MinIntake != 0.0f || __CurCompound.MaxIntake != 0.0f)
+			{
+				__randomValue = UnityEngine.Random.Range(__CurCompound.MinIntake, __CurCompound.MaxIntake);
+				__CurCompound.CurValue += (int)Math.Round(__randomValue);
+			}	
+		
 	}
 	
 	//TODO: Implement a better priority function than hardcoding Anerobic Respiration vs Aerobic Respiration
@@ -66,7 +98,7 @@ public class ProcessFunctions : MonoBehaviour {
 				// Anaerobic Respiration is only to be processed if AerobicResp isn't activated OR if oxygen level is under the Need of AerobicRespiration
 				if((_Process[(int)ProcessName.AerobicResp].Activated == false) || (_Compound[(int)CompoundName.Oxygen].CurValue < 6)) //TODO: This '6' is a hardcoded value of the Aerobic oxygen input. It shouldn't be hardcoded.
 				{
-					_curInputs  = parseStringIO(_Process[(int)ProcessName.AnaerobicResp].CompInput);  //PROCESS ANAEROBIC RESPIRATION
+					_curInputs  = parseStringIO(_Process[(int)ProcessName.AnaerobicResp].CompInput);
 					_curOutputs = parseStringIO(_Process[(int)ProcessName.AnaerobicResp].CompOutput);
 					__inputAvailable = VerifyInputs(_curInputs);
 					__outputAvailable = VerifyOutputs(_curOutputs);
@@ -77,11 +109,11 @@ public class ProcessFunctions : MonoBehaviour {
 				}
 			}
 			
-			// Execute the Process if it isn't Anerobic Respiration
+			// Execute process that doesn't have priorities management
 			if(__CurProcess.Name != "AnaerobicResp")
 			{
 				ProcessName processIndex = (ProcessName) Enum.Parse(typeof(ProcessName), __CurProcess.Name);  
-				_curInputs  = parseStringIO(_Process[(int)processIndex].CompInput);  //PROCESS ANAEROBIC RESPIRATION
+				_curInputs  = parseStringIO(_Process[(int)processIndex].CompInput);
 				_curOutputs = parseStringIO(_Process[(int)processIndex].CompOutput);
 				__inputAvailable = VerifyInputs(_curInputs);
 				__outputAvailable = VerifyOutputs(_curOutputs);
@@ -93,12 +125,12 @@ public class ProcessFunctions : MonoBehaviour {
 		}	
 	}
 	
+	// Execute the process by adding/removing compounds to the compounds list
 	void ExecuteProcess(List<_CoumpoundsIO> __curInputs, List<_CoumpoundsIO> __curOutputs)
 	{
 		//Loop Inputs and remove them from compounds list
 		for(int i = 0; i < __curInputs.Count;i++)
 		{
-			Debug.Log ("Inputs updated");
 			CompoundName compoundIndex = (CompoundName) Enum.Parse(typeof(CompoundName), __curInputs[i].type);  
 			_Compound[(int)compoundIndex].CurValue -= __curInputs[i].nbr;
 		}
@@ -106,13 +138,13 @@ public class ProcessFunctions : MonoBehaviour {
 		//Loop Outputs and add them to compounds list
 		for(int i = 0; i < __curOutputs.Count;i++)
 		{
-			Debug.Log ("Outputs updated");
 			CompoundName compoundIndex = (CompoundName) Enum.Parse(typeof(CompoundName), __curOutputs[i].type);  
 			_Compound[(int)compoundIndex].CurValue += __curOutputs[i].nbr;
 		}
 		
 	}
 	
+	// Verifiy that all Inputs are available for the process to take place
 	bool VerifyInputs(List<_CoumpoundsIO> __curInputs)
 	{
 		bool   __compoundAvailable = true;
@@ -130,6 +162,7 @@ public class ProcessFunctions : MonoBehaviour {
 		return __compoundAvailable;
 	}
 	
+	// Verify that there are enough space available for the process to take place
 	bool VerifyOutputs(List<_CoumpoundsIO> __curOutputs)
 	{
 		bool   __compoundAvailable = true;
@@ -138,12 +171,8 @@ public class ProcessFunctions : MonoBehaviour {
 		{
 			CompoundName compoundIndex = (CompoundName) Enum.Parse(typeof(CompoundName), __curOutputs[i].type);  
 			
-			//Debug.Log ("Condition 1 : " + (_Compound[(int)compoundIndex].LimValue == true));
-			//Debug.Log ("Condition 2 : " + (_Compound[(int)compoundIndex].CurValue + __curOutputs[i].nbr > _Compound[(int)compoundIndex].MaxValue));
-			
 			if((_Compound[(int)compoundIndex].LimValue == true) && (_Compound[(int)compoundIndex].CurValue + __curOutputs[i].nbr > _Compound[(int)compoundIndex].MaxValue))
 			{
-				Debug.Log ("Compound Unavailable");
 				__compoundAvailable = false;
 			}
 		}

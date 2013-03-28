@@ -7,6 +7,9 @@ public class Compound {
 	private int _curValue = 0;
 	private int _maxValue = 100;
 	private bool _limValue = true;
+	private float _maxIntake = 0.0f;
+	private float _minIntake = 0.0f;
+	
 	
 	public string Name
 	{
@@ -20,7 +23,6 @@ public class Compound {
 		set {_curValue = value; }
 	}
 	
-	
 	public int MaxValue
 	{
 		get {return _maxValue; }
@@ -33,6 +35,17 @@ public class Compound {
 		set {_limValue = value; }
 	}
 	
+	public float MaxIntake
+	{
+		get {return _maxIntake; }
+		set {_maxIntake = value; }
+	}
+	
+	public float MinIntake
+	{
+		get {return _minIntake; }
+		set {_minIntake = value; }
+	}
 }
 
 // Enumeration of all Compound

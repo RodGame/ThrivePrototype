@@ -59,12 +59,6 @@ public class CellControl : MonoBehaviour {
 			transform.rigidbody.AddForce(new Vector3(-cellSpeed, 0, 0));	
 			transform.GetComponent<CellParam>().cellMoved();
 		}
-		
-		if(Input.GetKeyDown (KeyCode.Q)) 			    // Open cell stats
-		{
-			transform.GetComponent<CellHUD>().switchStatsHUD();
-		}
-		
 	}
 	
 	void getMouseInput()
@@ -86,9 +80,10 @@ public class CellControl : MonoBehaviour {
 	
 	// Get Compounds on the ground
     void OnTriggerEnter(Collider other) {
+		GameObject.FindGameObjectWithTag("StageManager").GetComponent<ResManagement>().nbrSugarInSoup -= 1;
 		Destroy(other.gameObject);
-		if(other.name == "Res_Glucose")
-		{
+		if(other.name == "Res_Glucose(Clone)")
+		{	
 			transform.GetComponent<CellParam>()._Compound[(int)CompoundName.Sugar].CurValue++;
 		}
     }

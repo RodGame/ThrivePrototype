@@ -4,6 +4,7 @@ using System;						//added to access the enum class
 
 //TODO: Make const variable 
 //TODO: Make HUD Parameters fonction of the screen.width/height
+//TODO: Update Floating function to take a string as input. Would make it more flexible
 public class CellHUD : MonoBehaviour {
 	public Texture textureATP;
 	public Texture textureATPBackground;
@@ -29,7 +30,8 @@ public class CellHUD : MonoBehaviour {
 	private Vector2 _mousePos;
 	private Rect    _objRect;
 	private int  _curProcessHover;
-		
+	private int  _curOrganelleHover;
+	
 	// Use this for initialization
 	void Start () {
 		_mousePos = new Vector2(0, 0);
@@ -42,6 +44,8 @@ public class CellHUD : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		
+		// Test if a Process is being hovered
 		_curProcessHover = -1;
 		for(int i = 0; i < Enum.GetValues(typeof(ProcessName)).Length ; i++)
 		{
@@ -51,10 +55,22 @@ public class CellHUD : MonoBehaviour {
 				//Debug.Log (((ProcessName)i));
 			}
 		}
+		
+		// Test if a Process is being hovered
+		_curOrganelleHover = -1;
+		for(int i = 0; i < Enum.GetValues(typeof(OrganelleName)).Length ; i++)
+		{
+			if(_mouseOver == ("MouseOverOnLabel" + ((OrganelleName)i).ToString()))
+			{
+				_curOrganelleHover = i;
+			}
+		}
 	}
 
+	// Display the GUI on screen
 	void OnGUI()
 	{
+		showStatsHUD = GameObject.FindGameObjectWithTag("GameManager").GetComponent<MenuHUD>().ShowStatsHUD;
 		displayATPBar();
 		if(showStatsHUD)
 		{
@@ -65,8 +81,14 @@ public class CellHUD : MonoBehaviour {
 		{
 			displayFloatingProcess(_curProcessHover);
 		}
+		
+		if(_curOrganelleHover != -1)
+		{
+			displayFloatingOrganelle(_curOrganelleHover);
+		}
 	}
 	
+	// Display a Floating Box at mouse position
 	private void displayFloatingProcess(int _ProcessToShow)
 	{
 
@@ -88,6 +110,24 @@ public class CellHUD : MonoBehaviour {
 		GUI.Label (new Rect(_objRect.x, _objRect.y + 4*LINE_HEIGHT, _objRect.width, _objRect.height), transform.GetComponent<CellParam>()._Process[_ProcessToShow].CompOutput);
 		}
 	
+	// Display a Floating Box at mouse position
+	private void displayFloatingOrganelle(int _OrganelleToShow)
+	{
+
+		_mousePos = Input.mousePosition;
+    	_objRect.x = _mousePos.x;
+    	_objRect.y = Mathf.Abs(_mousePos.y - Camera.main.pixelHeight) + LINE_HEIGHT;
+			
+		// Display semi-transparent background for processes and set color back to white
+		GUI.color        = new Color(0.0f, 0.0f, 0.0f, FLOATING_RECT_OPACITY);
+		GUI.DrawTexture(_objRect, WhiteTexture);
+		GUI.color = Color.white;
+		
+		// Display Input in the floating Rect
+		GUI.Label (new Rect(_objRect.x, _objRect.y                , _objRect.width, _objRect.height), "This Organelle enable : ");
+		GUI.Label (new Rect(_objRect.x, _objRect.y + 1*LINE_HEIGHT, _objRect.width, _objRect.height), "-> " + transform.GetComponent<CellParam>()._Organelle[_OrganelleToShow].EnabledProcess);
+		}
+	
 	// Display ATP Bar on screen
 	private void displayATPBar()
 	{
@@ -105,24 +145,29 @@ public class CellHUD : MonoBehaviour {
 	// Display HUD containing Compound and Process
 	private void displayStatsHUD()
 	{
-		//TODO: Merge toggle and label displays
+		//TODO: Merge toggle and label displays (Need to make sure it works with the floatingBox)
 		int _leftStatsHUD = (int)(Screen.width*0.05f);
 		bool __toggleBool = false;
 		
 		// Display semi-transparent background and set color back to white
+		#region Display Background
 		GUI.color        = new Color(0.0f, 0.0f, 0.0f, STATS_RECT_OPACITY);
 		GUI.DrawTexture(new Rect(_leftStatsHUD, 40, Screen.width*0.9f, Screen.height*0.85f), WhiteTexture);
 		GUI.color = Color.white;
+		#endregion
 		
 		// Display all Compoud and their values
+		#region Display Compound
 		GUI.contentColor = Color.white;			// Display the text in white
 		for(int i = 0; i < Enum.GetValues(typeof(CompoundName)).Length ; i++)
 		{
 			GUI.Label (new Rect(_leftStatsHUD                 , 40+(i*STATS_LINE_HEIGHT), LABEL_SIZE, STATS_LINE_HEIGHT) , ((CompoundName)i).ToString () );
 			GUI.Label (new Rect(_leftStatsHUD + LABEL_SIZE + 5, 40+(i*STATS_LINE_HEIGHT), NUMBER_SIZE, STATS_LINE_HEIGHT), transform.GetComponent<CellParam>()._Compound[i].CurValue + "/" + transform.GetComponent<CellParam>()._Compound[i].MaxValue  );
 		}
+		#endregion
 		
 		// Display Process and grey them out if they are not Available. Add a button to enable or disable the process
+		#region Display Process
 		GUI.contentColor = Color.white;			// Display the text in white
 		for(int i = 0; i < Enum.GetValues(typeof(ProcessName)).Length ; i++)
 		{
@@ -147,12 +192,26 @@ public class CellHUD : MonoBehaviour {
 			_mouseOver = GUI.tooltip;
 			GUI.contentColor = Color.white;
 		}	
-	}
-	
-	// Toggle stats HUD ON/OFF
-	public void switchStatsHUD()
-	{
-		showStatsHUD = !showStatsHUD;	
+		#endregion
+		
+		// Display Process and grey them out if they are not Available. Add a button to enable or disable the process
+		#region Display Organelle
+		GUI.contentColor = Color.white;			// Display the text in white
+		for(int i = 0; i < Enum.GetValues(typeof(OrganelleName)).Length ; i++)
+		{
+			// Change the text to grey if it's not available
+			if(transform.GetComponent<CellParam>()._Organelle[i].CurValue < 1)
+			{
+				GUI.contentColor = Color.grey;	
+			}
+			
+			GUI.Label (new Rect(_leftStatsHUD + 5*LABEL_SIZE + 20    , 40+(i*STATS_LINE_HEIGHT), LABEL_SIZE, STATS_LINE_HEIGHT), new GUIContent(((OrganelleName)i).ToString(),"MouseOverOnLabel" + ((OrganelleName)i).ToString()));
+			GUI.Label (new Rect(_leftStatsHUD + 6*LABEL_SIZE + 20 + 5, 40+(i*STATS_LINE_HEIGHT), NUMBER_SIZE, STATS_LINE_HEIGHT), transform.GetComponent<CellParam>()._Organelle[i].CurValue + "/" + transform.GetComponent<CellParam>()._Organelle[i].MaxValue  );
+			
+			_mouseOver = GUI.tooltip;
+			GUI.contentColor = Color.white;			// Display the text in white
+		}
+		#endregion
 	}
 }
 

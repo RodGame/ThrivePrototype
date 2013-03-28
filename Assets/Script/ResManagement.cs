@@ -7,16 +7,14 @@ public class ResManagement : MonoBehaviour {
 	public GameObject resGlucose;
 	public List<GameObject> resList; 
 	
-	public int nbrRes;
 	public int radiusSpawnRes; 
-	
-	
-	
+	public int nbrSugarToCreate;	
+	public int nbrSugarInSoup;
 	
 	// Use this for initialization
 	void Awake () {
-		nbrRes = 100;
-		radiusSpawnRes = 50;
+		nbrSugarToCreate = 50;
+		radiusSpawnRes = 10;
 	}
 	
 	void Start () 
@@ -26,9 +24,9 @@ public class ResManagement : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		while(resList.Count <= nbrRes)
+		while(nbrSugarInSoup < nbrSugarToCreate)
 		{
-			CreateRes("Glucose");
+			CreateRes("Sugar");
 		}
 	}
 			
@@ -40,7 +38,6 @@ public class ResManagement : MonoBehaviour {
 		_resPos = Random.insideUnitSphere*radiusSpawnRes;
 		_resPos.y = resGlucose.transform.localScale.y/2;
 		_curGameObject = Instantiate(resGlucose, _resPos, Quaternion.identity) as GameObject;
-		_curGameObject.name = "Res_Glucose";
-		resList.Add (_curGameObject);
+		nbrSugarInSoup++;
 	}
 }
